@@ -102,8 +102,7 @@ async function main() {
 
     const data = {
       timestamp: new Date().toISOString(),
-      activeCharacters: activeSessions.map(s => s.character),
-      sessions: activeSessions
+      activeCharacters: activeSessions.map(s => s.character)
     };
 
     await updateGist(data);
