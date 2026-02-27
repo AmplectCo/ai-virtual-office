@@ -519,6 +519,20 @@ const chars=[
 
 chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.path=[];c.status='active';c.dir=c.ddir;c.idleDir=2;c.idleAct='sit';});
 
+// Gist integration
+const GIST_URL='https://gist.githubusercontent.com/amplectco/79b04d6aabfb19c285da2bb7ecdf037d/raw/active-sessions.json';
+async function fetchStatus(){
+    try{
+        const r=await fetch(GIST_URL+'?t='+Date.now());
+        const d=await r.json();
+        const active=new Set(d.activeCharacters||[]);
+        chars.forEach(c=>{c.status=active.has(c.id)?'active':'idle';});
+        console.log('['+new Date().toLocaleTimeString()+'] Active:',d.activeCharacters);
+    }catch(e){console.warn('Fetch error:',e.message);}
+}
+fetchStatus();
+setInterval(fetchStatus,30000);
+
 function cw(x,y){if(x<0||y<0||x>=MW||y>=MH)return false;return M[y][x]===0||M[y][x]===2;}
 function bfs(sx,sy,ex,ey){
     if(!cw(ex,ey))return null;
