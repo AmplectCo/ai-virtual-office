@@ -521,14 +521,22 @@ chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.pa
 
 // Gist integration
 const GIST_URL='https://gist.githubusercontent.com/amplectco/79b04d6aabfb19c285da2bb7ecdf037d/raw/active-sessions.json';
+let useRealtime=false,realtimeActive=new Set();
 async function fetchStatus(){
     try{
         const r=await fetch(GIST_URL+'?t='+Date.now());
         const d=await r.json();
-        const active=new Set(d.activeCharacters||[]);
-        chars.forEach(c=>{c.status=active.has(c.id)?'active':'idle';});
-        console.log('['+new Date().toLocaleTimeString()+'] Active:',d.activeCharacters);
-    }catch(e){console.warn('Fetch error:',e.message);}
+        const active=(d.activeCharacters||[]);
+        if(active.length>0){
+            useRealtime=true;
+            realtimeActive=new Set(active);
+            chars.forEach(c=>{c.status=realtimeActive.has(c.id)?'active':'idle';});
+            console.log('['+new Date().toLocaleTimeString()+'] Real-time active:',active);
+        }else{
+            useRealtime=false;
+            console.log('['+new Date().toLocaleTimeString()+'] No real data, using random behavior');
+        }
+    }catch(e){console.warn('Fetch error:',e.message);useRealtime=false;}
 }
 fetchStatus();
 setInterval(fetchStatus,30000);
@@ -568,21 +576,36 @@ function update(dt){
     stT+=dt;
     if(stT>20+Math.random()*20){
         stT=0;
-        chars.forEach(c=>{
-            if(Math.random()>0.5){
-                if(c.status==='active'){
-                    c.status='idle';
+        // Only use random behavior if no real-time data
+        if(!useRealtime){
+            chars.forEach(c=>{
+                if(Math.random()>0.5){
+                    if(c.status==='active'){
+                        c.status='idle';
+                        const s=idles[Math.floor(Math.random()*idles.length)];
+                        const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
+                        if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
+                    }else{
+                        c.status='active';
+                        const p=bfs(Math.round(c.x),Math.round(c.y),c.desk.x,c.desk.y);
+                        if(p&&p.length){c.path=p;c.moving=true;}
+                        else{c.x=c.desk.x;c.y=c.desk.y;c.moving=false;}
+                    }
+                }
+            });
+        }else{
+            // With real-time data: send idle people to chill, active to desks
+            chars.forEach(c=>{
+                if(c.status==='idle'&&!c.moving){
                     const s=idles[Math.floor(Math.random()*idles.length)];
                     const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
                     if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
-                }else{
-                    c.status='active';
+                }else if(c.status==='active'&&!c.moving){
                     const p=bfs(Math.round(c.x),Math.round(c.y),c.desk.x,c.desk.y);
                     if(p&&p.length){c.path=p;c.moving=true;}
-                    else{c.x=c.desk.x;c.y=c.desk.y;c.moving=false;}
                 }
-            }
-        });
+            });
+        }
     }
     chars.forEach(c=>{
         if(c.moving&&c.path.length){
