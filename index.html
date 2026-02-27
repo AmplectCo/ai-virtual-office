@@ -360,7 +360,46 @@ const chars=[
     {id:'anton',name:'Anton',role:'Marketing',desk:{x:3,y:6},ddir:0},
 ];
 
-chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.path=[];c.status='active';c.dir=c.ddir;c.idleDir=2;c.idleAct='sit';});
+chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.path=[];c.status='idle';c.dir=c.ddir;c.idleDir=2;c.idleAct='sit';});
+
+// Active sessions integration
+const GIST_URL = 'https://gist.githubusercontent.com/AmplectCo/49af6aa1e072bfc79310a72d1dcac5fa/raw/active-sessions.json';
+const CHILL_ZONES = [{x:21,y:12},{x:22,y:13},{x:21,y:14}]; // Couch spots
+
+async function fetchActiveSessions() {
+    try {
+        const response = await fetch(GIST_URL + '?t=' + Date.now());
+        if (!response.ok) return;
+        const data = await response.json();
+        const activeIds = data.activeCharacters || [];
+        
+        chars.forEach(c => {
+            const isActive = activeIds.includes(c.id);
+            if (isActive && c.status !== 'active') {
+                // User just became active — go to desk
+                c.status = 'active';
+                c.targetX = c.desk.x;
+                c.targetY = c.desk.y;
+                c.path = bfs(Math.floor(c.x), Math.floor(c.y), c.targetX, c.targetY);
+                c.moving = c.path && c.path.length > 0;
+            } else if (!isActive && c.status !== 'idle') {
+                // User went idle — go to chill zone
+                c.status = 'idle';
+                const spot = CHILL_ZONES[Math.floor(Math.random() * CHILL_ZONES.length)];
+                c.targetX = spot.x;
+                c.targetY = spot.y;
+                c.path = bfs(Math.floor(c.x), Math.floor(c.y), c.targetX, c.targetY);
+                c.moving = c.path && c.path.length > 0;
+            }
+        });
+    } catch (err) {
+        console.error('Failed to fetch active sessions:', err);
+    }
+}
+
+// Poll every 10 seconds
+setInterval(fetchActiveSessions, 10000);
+fetchActiveSessions(); // Initial fetch
 
 function cw(x,y){if(x<0||y<0||x>=MW||y>=MH)return false;return M[y][x]===0||M[y][x]===2;}
 function bfs(sx,sy,ex,ey){
