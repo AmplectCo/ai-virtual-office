@@ -159,10 +159,14 @@ blk(11,4,2,2); // vertical stem
 // Empty room desks
 blk(19,2,3,1);blk(22,2,3,1);
 
-// Chill zone: x=18-24, y=14-20
-blk(19,15,3,1); // couch top
-blk(19,18,3,1); // couch bottom
-blk(23,16,1,1); // side table
+// Chill zone: x=18-24, y=11-20 (expanded!)
+blk(19,12,3,1); // couch 1 top
+blk(22,12,2,1); // small couch 1
+blk(19,15,3,1); // couch 2 top
+blk(19,18,3,1); // couch 3 bottom
+blk(22,18,2,1); // small couch 2
+blk(23,14,1,1); // side table 1
+blk(20,16,1,1); // coffee table
 blk(24,15,1,2); // dartboard area
 
 // Plants, decor
@@ -360,16 +364,22 @@ function drawBg(){
         drawChair(bg,d.x*T+3*T/2-8,(d.y+1)*T,'down');
     });
     
-    // CHILL ZONE
-    drawCouch(bg,19*T,15*T,3*T,'top');    // backrest at top (sit facing down)
-    drawCouch(bg,19*T,18*T,3*T,'bottom'); // backrest at bottom (sit facing up)
-    // Side table
-    bg.fillStyle='#5a4020';bg.fillRect(23*T+6,16*T+6,T-12,T-12);
-    bg.strokeStyle='#000';bg.lineWidth=1;bg.strokeRect(23*T+6,16*T+6,T-12,T-12);
-    bg.fillStyle='#c8a060';bg.fillRect(23*T+12,16*T+12,8,8);
+    // CHILL ZONE (expanded)
+    drawCouch(bg,19*T,12*T,3*T,'top');    // couch 1
+    drawCouch(bg,22*T,12*T,2*T,'top');    // small couch 1
+    drawCouch(bg,19*T,15*T,3*T,'top');    // couch 2
+    drawCouch(bg,19*T,18*T,3*T,'bottom'); // couch 3
+    drawCouch(bg,22*T,18*T,2*T,'bottom'); // small couch 2
+    // Tables
+    bg.fillStyle='#5a4020';bg.fillRect(23*T+6,14*T+6,T-12,T-12);
+    bg.strokeStyle='#000';bg.lineWidth=1;bg.strokeRect(23*T+6,14*T+6,T-12,T-12);
+    bg.fillStyle='#c8a060';bg.fillRect(23*T+10,14*T+10,10,10);
+    // Coffee table
+    bg.fillStyle='#5a4020';bg.fillRect(20*T+8,16*T+8,T-16,T-16);
+    bg.strokeStyle='#000';bg.lineWidth=1;bg.strokeRect(20*T+8,16*T+8,T-16,T-16);
     // Rug
-    bg.fillStyle='rgba(100,50,30,0.12)';bg.fillRect(19*T,16*T,4*T,2*T);
-    bg.strokeStyle='rgba(80,40,20,0.15)';bg.lineWidth=1;bg.strokeRect(19*T+2,16*T+2,4*T-4,2*T-4);
+    bg.fillStyle='rgba(100,50,30,0.12)';bg.fillRect(19*T,13*T,5*T,6*T);
+    bg.strokeStyle='rgba(80,40,20,0.15)';bg.lineWidth=1;bg.strokeRect(19*T+2,13*T+2,5*T-4,6*T-4);
     
     // Dartboard
     const dcx=24*T+T/2,dcy=15*T+T;
@@ -517,7 +527,21 @@ const chars=[
     {id:'anton',name:'Anton',role:'Marketing',desk:{x:2,y:3},ddir:0},
 ];
 
-chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.path=[];c.status='active';c.dir=c.ddir;c.idleDir=2;c.idleAct='sit';});
+chars.forEach(c=>{c.x=c.desk.x;c.y=c.desk.y;c.frame=0;c.ft=0;c.moving=false;c.path=[];c.status='active';c.dir=c.ddir;c.idleDir=2;c.idleAct='sit';c.targetSpot=null;});
+
+// Occupancy tracking
+const occupied=new Set();
+function reserveSpot(x,y,char){
+    const k=x+','+y;
+    if(occupied.has(k))return false;
+    occupied.add(k);
+    if(char.targetSpot)occupied.delete(char.targetSpot);
+    char.targetSpot=k;
+    return true;
+}
+function releaseSpot(char){
+    if(char.targetSpot){occupied.delete(char.targetSpot);char.targetSpot=null;}
+}
 
 // Gist integration
 const GIST_URL='https://gist.githubusercontent.com/amplectco/79b04d6aabfb19c285da2bb7ecdf037d/raw/active-sessions.json';
@@ -558,17 +582,27 @@ function bfs(sx,sy,ex,ey){
 }
 
 const idles=[
-    // ON the couches (couch top at y=15, bottom at y=18)
-    {x:20,y:15,dir:2,act:'sit'},   // top couch
-    {x:21,y:15,dir:2,act:'sit'},
-    {x:20,y:18,dir:0,act:'sit'},   // bottom couch
-    {x:21,y:18,dir:0,act:'sit'},
-    // Dartboard
-    {x:23,y:17,dir:3,act:'dart'},  // facing right toward board
-    {x:23,y:16,dir:3,act:'dart'},
-    // Corridor
-    {x:12,y:8,dir:2,act:'walk'},
-    {x:18,y:9,dir:1,act:'walk'},
+    // Couches (5 couches total!)
+    {x:20,y:12,dir:2,act:'sit'},{x:21,y:12,dir:2,act:'sit'}, // couch 1
+    {x:22,y:12,dir:2,act:'sit'},{x:23,y:12,dir:2,act:'sit'}, // small couch 1
+    {x:20,y:15,dir:2,act:'sit'},{x:21,y:15,dir:2,act:'sit'}, // couch 2
+    {x:20,y:18,dir:0,act:'sit'},{x:21,y:18,dir:0,act:'sit'}, // couch 3
+    {x:22,y:18,dir:0,act:'sit'},{x:23,y:18,dir:0,act:'sit'}, // small couch 2
+    // Dartboard area (group activity - 4 spots)
+    {x:23,y:17,dir:3,act:'dart'},{x:23,y:16,dir:3,act:'dart'},
+    {x:22,y:17,dir:3,act:'dart'},{x:22,y:16,dir:3,act:'dart'},
+    // Coffee table standing
+    {x:19,y:16,dir:3,act:'coffee'},{x:21,y:16,dir:1,act:'coffee'},
+    // Corridor (more spots)
+    {x:10,y:8,dir:2,act:'walk'},{x:12,y:8,dir:2,act:'walk'},{x:14,y:8,dir:2,act:'walk'},
+    {x:16,y:9,dir:1,act:'walk'},{x:18,y:9,dir:1,act:'walk'},{x:20,y:9,dir:1,act:'walk'},
+    // Water cooler
+    {x:17,y:9,dir:3,act:'water'},{x:15,y:9,dir:1,act:'water'},
+    // By windows (looking outside)
+    {x:3,y:1,dir:0,act:'window'},{x:6,y:1,dir:0,act:'window'},
+    {x:20,y:1,dir:0,act:'window'},{x:23,y:1,dir:0,act:'window'},
+    // Marketing area
+    {x:3,y:4,dir:2,act:'chat'},{x:6,y:4,dir:1,act:'chat'},
 ];
 
 let stT=0;
@@ -582,11 +616,22 @@ function update(dt){
                 if(Math.random()>0.5){
                     if(c.status==='active'){
                         c.status='idle';
-                        const s=idles[Math.floor(Math.random()*idles.length)];
-                        const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
-                        if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
+                        releaseSpot(c);
+                        // Try to find free spot (with preference for dart groups)
+                        const dartSpots=idles.filter(s=>s.act==='dart');
+                        const dartCount=chars.filter(ch=>ch.idleAct==='dart'&&ch.status==='idle').length;
+                        let spots=dartCount>=2&&Math.random()>0.5?dartSpots:idles.filter(s=>s.act!=='dart');
+                        spots=spots.filter(s=>!occupied.has(s.x+','+s.y));
+                        if(spots.length){
+                            const s=spots[Math.floor(Math.random()*spots.length)];
+                            if(reserveSpot(s.x,s.y,c)){
+                                const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
+                                if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
+                            }
+                        }
                     }else{
                         c.status='active';
+                        releaseSpot(c);
                         const p=bfs(Math.round(c.x),Math.round(c.y),c.desk.x,c.desk.y);
                         if(p&&p.length){c.path=p;c.moving=true;}
                         else{c.x=c.desk.x;c.y=c.desk.y;c.moving=false;}
@@ -597,10 +642,16 @@ function update(dt){
             // With real-time data: send idle people to chill, active to desks
             chars.forEach(c=>{
                 if(c.status==='idle'&&!c.moving){
-                    const s=idles[Math.floor(Math.random()*idles.length)];
-                    const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
-                    if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
+                    const spots=idles.filter(s=>!occupied.has(s.x+','+s.y));
+                    if(spots.length){
+                        const s=spots[Math.floor(Math.random()*spots.length)];
+                        if(reserveSpot(s.x,s.y,c)){
+                            const p=bfs(Math.round(c.x),Math.round(c.y),s.x,s.y);
+                            if(p&&p.length){c.path=p;c.moving=true;c.idleDir=s.dir;c.idleAct=s.act;}
+                        }
+                    }
                 }else if(c.status==='active'&&!c.moving){
+                    releaseSpot(c);
                     const p=bfs(Math.round(c.x),Math.round(c.y),c.desk.x,c.desk.y);
                     if(p&&p.length){c.path=p;c.moving=true;}
                 }
@@ -612,7 +663,11 @@ function update(dt){
             const t=c.path[0],dx=t.x-c.x,dy=t.y-c.y,d=Math.sqrt(dx*dx+dy*dy);
             if(d<0.05){
                 c.x=t.x;c.y=t.y;c.path.shift();
-                if(!c.path.length){c.moving=false;c.frame=0;c.dir=c.status==='active'?c.ddir:c.idleDir;}
+                if(!c.path.length){
+                    c.moving=false;c.frame=0;c.dir=c.status==='active'?c.ddir:c.idleDir;
+                    // Reserve final spot
+                    if(c.status==='idle')reserveSpot(Math.round(c.x),Math.round(c.y),c);
+                }
             }else{
                 c.x+=(dx/d)*1.2*dt;c.y+=(dy/d)*1.2*dt;
                 c.dir=Math.abs(dx)>Math.abs(dy)?(dx<0?1:3):(dy<0?0:2);
@@ -631,9 +686,15 @@ function drawChars(){
         const dx=c.x*T+T/2-SS/2,dy=c.y*T+T-SS+4+sitOff;
         cx.fillStyle='rgba(0,0,0,0.15)';
         cx.beginPath();cx.ellipse(c.x*T+T/2,c.y*T+T-1,10,4,0,0,Math.PI*2);cx.fill();
+        // Ilya: yellow sweater + darker hair (hue shift)
+        if(c.id==='ilya'){
+            cx.save();
+            cx.filter='hue-rotate(40deg) brightness(1.1) saturate(1.3)';
+        }
         // When sitting, clip bottom of sprite slightly (hide feet under desk)
         const srcH=sitting?58:64;
         cx.drawImage(img,c.frame*64,c.dir*64,64,srcH,dx,dy,SS,SS*(srcH/64));
+        if(c.id==='ilya')cx.restore();
         // Status dot
         cx.fillStyle=c.status==='active'?'#4a4':'#888';
         cx.beginPath();cx.arc(c.x*T+T/2,dy-3,4,0,Math.PI*2);cx.fill();
@@ -655,7 +716,8 @@ cv.addEventListener('mousemove',e=>{
     chars.forEach(c=>{if(Math.abs(mx-c.x*T-T/2)<24&&Math.abs(my-c.y*T-T/2)<32)h=c;});
     if(h){
         tip.style.display='block';tip.style.left=(e.clientX+15)+'px';tip.style.top=(e.clientY+15)+'px';
-        const st=h.status==='active'?'🟢 Working':(h.idleAct==='dart'?'🎯 Playing darts':'☕ Chilling');
+        const acts={'dart':'🎯 Playing darts','sit':'☕ Chilling','coffee':'☕ Coffee break','water':'💧 Water cooler','walk':'🚶 Walking','window':'🪟 Looking outside','chat':'💬 Chatting'};
+        const st=h.status==='active'?'🟢 Working':(acts[h.idleAct]||'☕ Chilling');
         tip.innerHTML='<div class="n">'+h.name+'</div><div class="r">'+h.role+'</div><div class="s" style="color:'+(h.status==='active'?'#4a4':'#888')+'">'+st+'</div>';
     }else tip.style.display='none';
 });
