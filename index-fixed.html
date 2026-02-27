@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amplect Office</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#1a1a2e;display:flex;flex-direction:column;align-items:center;font-family:'Courier New',monospace;color:#fff;overflow:auto}
+h1{color:#4a9;font-size:22px;margin:10px 0 4px;letter-spacing:3px;text-shadow:2px 2px 0 #000}
+canvas{image-rendering:pixelated;image-rendering:crisp-edges;display:block}
+#tip{position:fixed;background:rgba(20,25,35,.95);color:#fff;padding:8px 12px;border-radius:6px;font-size:12px;display:none;z-index:100;border:2px solid #4a9;pointer-events:none}
+#tip .n{color:#4a9;font-weight:bold;font-size:14px}
+#tip .r{color:#fa4;font-size:11px}
+#tip .s{margin-top:3px;font-size:11px}
+</style>
+</head>
+<body>
+<h1>🏢 AMPLECT OFFICE</h1>
+<canvas id="c"></canvas>
+<div id="tip"></div>
+
+<script>
+// Gist URL with active characters
+const GIST_URL = 'https://gist.githubusercontent.com/AmplectCo/79b04d6aabfb19c285da2bb7ecdf037d/raw/';
+let activeChars = [];
+
+// Fetch active characters
+async function fetchActive() {
+  try {
+    const res = await fetch(GIST_URL);
+    const text = await res.text();
+    activeChars = text.trim().split(',').filter(Boolean);
+  } catch(e) { console.error(e); }
+}
+
+fetchActive();
+setInterval(fetchActive, 30000);
+</script>
+
+<script src="data:text/javascript;base64,<!-- SPRITE DATA WILL GO HERE -->"></script>
+
+<script>
+// Rendering code will use activeChars array
+// This is simplified - full v16 code would be embedded here
+</script>
+</body>
+</html>

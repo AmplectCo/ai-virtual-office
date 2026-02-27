@@ -77,25 +77,27 @@ async function main() {
       process.exit(0);
     }
 
-    const snapshot = JSON.parse(fs.readFileSync(SESSIONS_SNAPSHOT, 'utf8'));
+    const raw = JSON.parse(fs.readFileSync(SESSIONS_SNAPSHOT, 'utf8'));
+    const sessions = Array.isArray(raw) ? raw : (raw.sessions || []);
     
     const now = Date.now();
     const fiveMinutesAgo = now - 5 * 60 * 1000;
     
     // Filter and map active sessions
-    const activeSessions = snapshot.sessions
+    const activeSessions = sessions
       .filter(s => {
-        if (!s.key.startsWith('agent:main:telegram:dm:')) return false;
-        if (s.updatedAt < fiveMinutesAgo) return false;
+        // Support both formats: {key: "agent:main:telegram:dm:123"} and {telegramId: "123", active: true}
+        if (s.telegramId) return s.active !== false;
+        if (!s.key || !s.key.startsWith('agent:main:telegram:dm:')) return false;
+        if (s.updatedAt && s.updatedAt < fiveMinutesAgo) return false;
         return true;
       })
       .map(s => {
-        const parts = s.key.split(':');
-        const telegramId = parts[parts.length - 1];
+        const telegramId = s.telegramId || s.key.split(':').pop();
         return {
           telegramId,
           character: TELEGRAM_TO_CHAR[telegramId],
-          lastActive: s.updatedAt
+          lastActive: s.updatedAt || s.lastActivity
         };
       })
       .filter(s => s.character);
