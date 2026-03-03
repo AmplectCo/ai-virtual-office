@@ -1,82 +1,20 @@
 {
-  "timestamp": "2026-02-27T19:06:00Z",
+  "snapshotAt": "2026-03-03T15:54:00Z",
+  "count": 1,
   "sessions": [
     {
-      "key": "agent:main:telegram:dm:469885561",
-      "displayName": "evock b (@evock) id:469885561",
-      "updatedAt": 1772219125923,
-      "model": "claude-opus-4-6",
-      "totalTokens": 98479
-    },
-    {
-      "key": "agent:main:main",
-      "displayName": "evock b (@evock) id:469885561",
-      "updatedAt": 1772219125657,
-      "model": "claude-opus-4-6",
-      "totalTokens": 88905
-    },
-    {
-      "key": "agent:main:telegram:dm:506059567",
-      "displayName": "Дмитрий (@dimonesk) id:506059567",
-      "updatedAt": 1772218556136,
-      "model": "claude-sonnet-4-5",
-      "totalTokens": 127668
-    },
-    {
-      "key": "agent:main:telegram:dm:337524124",
-      "displayName": "Artemius (@tret_art) id:337524124",
-      "updatedAt": 1772218445482,
-      "model": "claude-opus-4-6",
-      "totalTokens": 80377
-    },
-    {
-      "key": "agent:main:telegram:dm:5586780151",
-      "displayName": "I (@YeKudr) id:5586780151",
-      "updatedAt": 1772205172641,
-      "model": "claude-opus-4-6",
-      "totalTokens": 78948
-    },
-    {
-      "key": "agent:main:telegram:dm:504581051",
-      "displayName": "Vlad Boguslavets (@vladboguslavets) id:504581051",
-      "updatedAt": 1772194144914,
-      "model": "claude-opus-4-6",
-      "totalTokens": 19580
-    },
-    {
-      "key": "agent:main:telegram:dm:588611813",
-      "displayName": "Anton (@dzuacky) id:588611813",
-      "updatedAt": 1772188413324,
-      "model": "claude-opus-4-6",
-      "totalTokens": 105436
-    },
-    {
-      "key": "agent:main:telegram:dm:16656494",
-      "displayName": "Alexander Molchan id:16656494",
-      "updatedAt": 1772179288830,
-      "model": "claude-opus-4-6",
-      "totalTokens": 40133
-    },
-    {
-      "key": "agent:main:telegram:dm:698546795",
-      "displayName": "Alex Krasner id:698546795",
-      "updatedAt": 1772179285672,
-      "model": "claude-opus-4-6",
-      "totalTokens": 175116
-    },
-    {
-      "key": "agent:main:telegram:dm:177845028",
-      "displayName": "Alex (@xamel1ion) id:177845028",
-      "updatedAt": 1772178570532,
-      "model": "claude-opus-4-6",
-      "totalTokens": 106552
-    },
-    {
-      "key": "agent:main:slack:channel:c0af6cmefgu",
-      "displayName": "slack:#amp_here",
-      "updatedAt": 1772175741399,
-      "model": "claude-opus-4-6",
-      "totalTokens": 70476
+      "key": "agent:main:cron:deee7ac0-6e7d-4f82-a61c-f214d817e31a",
+      "kind": "other",
+      "channel": "unknown",
+      "label": "Cron: amplect-office-gist-updater",
+      "displayName": "Cron: amplect-office-gist-updater",
+      "updatedAt": 1772553251468,
+      "sessionId": "c7d4fb3a-a26d-4c07-a4b3-e1bf45c256c6",
+      "model": "kimi-k2-thinking",
+      "contextTokens": 262144,
+      "totalTokens": 12037,
+      "systemSent": true,
+      "transcriptPath": "/home/openclaw/.openclaw/workspace/c7d4fb3a-a26d-4c07-a4b3-e1bf45c256c6.jsonl"
     }
   ]
 }
