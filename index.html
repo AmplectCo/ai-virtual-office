@@ -543,27 +543,28 @@ function releaseSpot(char){
     if(char.targetSpot){occupied.delete(char.targetSpot);char.targetSpot=null;}
 }
 
-// Gist integration
-const GIST_URL='https://gist.githubusercontent.com/amplectco/79b04d6aabfb19c285da2bb7ecdf037d/raw/active-sessions.json';
+// Gist integration - DISABLED to reduce token consumption
+// const GIST_URL='https://gist.githubusercontent.com/amplectco/79b04d6aabfb19c285da2bb7ecdf037d/raw/active-sessions.json';
 let useRealtime=false,realtimeActive=new Set();
-async function fetchStatus(){
-    try{
-        const r=await fetch(GIST_URL+'?t='+Date.now());
-        const d=await r.json();
-        const active=(d.activeCharacters||[]);
-        if(active.length>0){
-            useRealtime=true;
-            realtimeActive=new Set(active);
-            chars.forEach(c=>{c.status=realtimeActive.has(c.id)?'active':'idle';});
-            console.log('['+new Date().toLocaleTimeString()+'] Real-time active:',active);
-        }else{
-            useRealtime=false;
-            console.log('['+new Date().toLocaleTimeString()+'] No real data, using random behavior');
-        }
-    }catch(e){console.warn('Fetch error:',e.message);useRealtime=false;}
-}
-fetchStatus();
-setInterval(fetchStatus,30000);
+// async function fetchStatus(){
+//     try{
+//         const r=await fetch(GIST_URL+'?t='+Date.now());
+//         const d=await r.json();
+//         const active=(d.activeCharacters||[]);
+//         if(active.length>0){
+//             useRealtime=true;
+//             realtimeActive=new Set(active);
+//             chars.forEach(c=>{c.status=realtimeActive.has(c.id)?'active':'idle';});
+//             console.log('['+new Date().toLocaleTimeString()+'] Real-time active:',active);
+//         }else{
+//             useRealtime=false;
+//             console.log('['+new Date().toLocaleTimeString()+'] No real data, using random behavior');
+//         }
+//     }catch(e){console.warn('Fetch error:',e.message);useRealtime=false;}
+// }
+// fetchStatus();
+// setInterval(fetchStatus,30000);
+console.log('[Gist] Real-time status fetching disabled - using random behavior only');
 
 function cw(x,y){if(x<0||y<0||x>=MW||y>=MH)return false;return M[y][x]===0||M[y][x]===2;}
 function bfs(sx,sy,ex,ey){
