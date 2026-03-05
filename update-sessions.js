@@ -126,21 +126,25 @@ async function updateGist(data) {
 
 async function main() {
   try {
-    // Get active sessions from OpenClaw
-    const activeSessions = await getActiveSessions();
+    console.log('⚠️  Gist updates are disabled. Exiting.');
+    console.log('🔧 To re-enable, uncomment the code in update-sessions.js');
+    process.exit(0);
     
-    const activeCharacters = activeSessions.map(s => s.character);
-
-    const data = {
-      timestamp: new Date().toISOString(),
-      activeCharacters,
-      sessions: activeSessions
-    };
-
-    // Update Gist
-    await updateGist(data);
+    // DISABLED: Get active sessions from OpenClaw
+    // const activeSessions = await getActiveSessions();
     
-    console.log(`[${data.timestamp}] Active: ${activeCharacters.join(', ') || 'none'}`);
+    // const activeCharacters = activeSessions.map(s => s.character);
+
+    // const data = {
+    //   timestamp: new Date().toISOString(),
+    //   activeCharacters,
+    //   sessions: activeSessions
+    // };
+
+    // DISABLED: Update Gist
+    // await updateGist(data);
+    
+    // console.log(`[${data.timestamp}] Active: ${activeCharacters.join(', ') || 'none'}`);
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);
